@@ -44,7 +44,7 @@ class EconomyServiceTest {
         planet.setId(1L);
         planet.setPlayerId(1L);
         planet.setTemperature(50);
-        when(planetRepository.findById(1L)).thenReturn(Optional.of(planet));
+        lenient().when(planetRepository.findById(1L)).thenReturn(Optional.of(planet));
         lenient().when(planetRepository.save(any(Planet.class))).thenAnswer(inv -> inv.getArgument(0));
     }
 
