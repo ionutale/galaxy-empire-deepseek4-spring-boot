@@ -1,0 +1,67 @@
+<h2>Phase 7 — Resources/Economy: Approaches</h2>
+<p class="subtitle">You picked all 8 features. How should we batch them?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Big Bang — Everything in One Phase</h3>
+      <p>EconomyService, storage caps, production ticks, fusion reactor, energy deficit, dark matter, header bar, rate display — one design doc, one plan, one implementation cycle.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul><li>Single consistent pass through the codebase</li><li>One migration (V9)</li><li>Coherent end-to-end</li></ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul><li>Large scope — estimation risk</li><li>Dark matter feature creep</li><li>Long implementation cycle</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Core Economy First → UI + Dark Matter Later</h3>
+      <p><strong>Phase 7a:</strong> EconomyService, storage caps, production tick, fusion reactor, energy deficit<br>
+         <strong>Phase 7b:</strong> Resource header bar, production rate display<br>
+         <strong>Phase 7c:</strong> Dark matter earning + spending</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul><li>7a delivers meaningful gameplay value fast</li><li>Smaller batches = faster iteration</li><li>Dark matter gets its own design</li></ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul><li>Three design cycles</li><li>UI changes may touch 7a backend</li><li>Slightly more overhead</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Refactor-First → Core → UI → Dark Matter</h3>
+      <p><strong>Phase 7a:</strong> EconomyService refactor + storage caps (no new behavior)<br>
+         <strong>Phase 7b:</strong> Production tick + fusion reactor + energy deficit<br>
+         <strong>Phase 7c:</strong> Resource header bar + rate display<br>
+         <strong>Phase 7d:</strong> Dark matter</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul><li>Clean foundation before adding features</li><li>Each phase is small and focused</li></ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul><li>7a is pure refactor — no visible value</li><li>4 design cycles is a lot of overhead</li><li>Higher risk of interface thrash</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="subtitle">Click an option to select. I recommend <strong>B (Core → UI → Dark Matter)</strong> — the core economy ships fastest, UI is a natural follow-up, and dark matter deserves its own design treatment.</p>
+</div>

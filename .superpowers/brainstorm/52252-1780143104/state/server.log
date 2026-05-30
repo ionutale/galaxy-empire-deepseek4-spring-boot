@@ -1,0 +1,11 @@
+{"type":"server-started","port":54212,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:54212","screen_dir":"/Users/ionutale/developer-playground/galaxy-empire-deepseek4-spring-boot/.superpowers/brainstorm/52252-1780143104/content","state_dir":"/Users/ionutale/developer-playground/galaxy-empire-deepseek4-spring-boot/.superpowers/brainstorm/52252-1780143104/state"}
+{"type":"screen-added","file":"/Users/ionutale/developer-playground/galaxy-empire-deepseek4-spring-boot/.superpowers/brainstorm/52252-1780143104/content/galaxy-map-layout.html"}
+{"source":"user-event","type":"click","text":"2","choice":"g2","id":null,"timestamp":1780143401265}
+{"source":"user-event","type":"click","text":"3","choice":"g3","id":null,"timestamp":1780143401815}
+{"source":"user-event","type":"click","text":"4","choice":"g4","id":null,"timestamp":1780143402298}
+{"source":"user-event","type":"click","text":"1","choice":"g1","id":null,"timestamp":1780144610868}
+{"source":"user-event","type":"click","text":"2","choice":"g2","id":null,"timestamp":1780144611301}
+{"source":"user-event","type":"click","text":"3","choice":"g3","id":null,"timestamp":1780144611834}
+{"source":"user-event","type":"click","text":"4","choice":"g4","id":null,"timestamp":1780144612284}
+{"source":"user-event","type":"click","text":"8","choice":"g8","id":null,"timestamp":1780144863781}
+{"type":"server-stopped","reason":"idle timeout"}

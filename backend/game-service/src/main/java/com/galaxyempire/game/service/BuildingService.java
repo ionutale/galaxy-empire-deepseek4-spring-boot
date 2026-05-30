@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -17,17 +18,23 @@ public class BuildingService {
     private final ConstructionQueueRepository constructionQueueRepository;
     private final GameBalancer balancer;
     private final PlanetService planetService;
+    private final EconomyService economyService;
+    private final DarkMatterService darkMatterService;
     private final int maxQueue;
 
     public BuildingService(PlanetRepository planetRepository, BuildingRepository buildingRepository,
                            ConstructionQueueRepository constructionQueueRepository,
                            GameBalancer balancer, PlanetService planetService,
+                           EconomyService economyService,
+                           DarkMatterService darkMatterService,
                            @Value("${game.constructions.max-queue-per-planet:5}") int maxQueue) {
         this.planetRepository = planetRepository;
         this.buildingRepository = buildingRepository;
         this.constructionQueueRepository = constructionQueueRepository;
         this.balancer = balancer;
         this.planetService = planetService;
+        this.economyService = economyService;
+        this.darkMatterService = darkMatterService;
         this.maxQueue = maxQueue;
     }
 
@@ -64,14 +71,9 @@ public class BuildingService {
 
         planetService.recalculate(planet);
 
-        if (planet.getMetal() < metalCost || planet.getCrystal() < crystalCost || planet.getGas() < gasCost) {
+        if (!economyService.checkAndDeduct(planetId, metalCost, crystalCost, gasCost)) {
             throw new IllegalArgumentException("Insufficient resources");
         }
-
-        planet.setMetal(planet.getMetal() - metalCost);
-        planet.setCrystal(planet.getCrystal() - crystalCost);
-        planet.setGas(planet.getGas() - gasCost);
-        planetRepository.save(planet);
 
         Building robotFactory = buildingRepository
             .findByPlanetIdAndBuildingType(planetId, BuildingType.ROBOT_FACTORY)
@@ -118,6 +120,19 @@ public class BuildingService {
 
         queue.setCompleted(true);
         return constructionQueueRepository.save(queue);
+    }
+
+    @Transactional
+    public void speedUpConstruction(Long queueId, Long playerId) {
+        ConstructionQueue queue = constructionQueueRepository.findById(queueId)
+            .orElseThrow(() -> new IllegalArgumentException("Queue item not found"));
+        long remainingSeconds = Duration.between(Instant.now(), queue.getCompletesAt()).getSeconds();
+        int cost = DarkMatterService.calculateSpeedUpCost(remainingSeconds);
+        if (cost > 0 && !darkMatterService.spendDarkMatter(playerId, cost)) {
+            throw new IllegalArgumentException("Not enough dark matter");
+        }
+        queue.setCompletesAt(Instant.now());
+        constructionQueueRepository.save(queue);
     }
 
     public Map<String, Object> getUpgradeCost(Long planetId, int gridPosition) {

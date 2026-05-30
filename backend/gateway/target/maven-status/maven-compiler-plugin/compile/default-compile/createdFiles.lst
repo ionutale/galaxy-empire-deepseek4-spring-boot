@@ -1,0 +1,3 @@
+com/galaxyempire/gateway/GatewayApplication.class
+com/galaxyempire/gateway/config/GatewayConfig.class
+com/galaxyempire/gateway/filter/JwtAuthFilter.class

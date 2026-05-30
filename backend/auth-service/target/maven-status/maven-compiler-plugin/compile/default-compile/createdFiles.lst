@@ -1,0 +1,9 @@
+com/galaxyempire/auth/web/AuthResponse.class
+com/galaxyempire/auth/AuthServiceApplication.class
+com/galaxyempire/auth/repository/PlayerRepository.class
+com/galaxyempire/auth/web/AuthController.class
+com/galaxyempire/auth/config/JwtUtil.class
+com/galaxyempire/auth/config/SecurityConfig.class
+com/galaxyempire/auth/service/AuthService.class
+com/galaxyempire/auth/domain/Player.class
+com/galaxyempire/auth/web/LoginRequest.class

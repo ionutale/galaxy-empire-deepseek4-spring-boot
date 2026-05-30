@@ -16,13 +16,16 @@ public class PlanetService {
     private final BuildingRepository buildingRepository;
     private final GameBalancer balancer;
     private final ResourceService resourceService;
+    private final PlayerTechnologyRepository playerTechnologyRepository;
 
     public PlanetService(PlanetRepository planetRepository, BuildingRepository buildingRepository,
-                         GameBalancer balancer, ResourceService resourceService) {
+                         GameBalancer balancer, ResourceService resourceService,
+                         PlayerTechnologyRepository playerTechnologyRepository) {
         this.planetRepository = planetRepository;
         this.buildingRepository = buildingRepository;
         this.balancer = balancer;
         this.resourceService = resourceService;
+        this.playerTechnologyRepository = playerTechnologyRepository;
     }
 
     @Transactional
@@ -61,6 +64,40 @@ public class PlanetService {
         );
         buildingRepository.saveAll(starters);
 
+        return planet;
+    }
+
+    @Transactional
+    public Planet createPlanetAt(Long playerId, int galaxy, int systemId, int slot) {
+        if (galaxy < 1 || galaxy > 9 || systemId < 1 || systemId > 500 || slot < 1 || slot > 15) {
+            throw new IllegalArgumentException("Invalid coordinates");
+        }
+        if (planetRepository.existsByGalaxyAndSystemIdAndSlot(galaxy, systemId, slot)) {
+            throw new IllegalArgumentException("Planet already exists at these coordinates");
+        }
+        int temperature = randomTemperature(slot);
+        Planet planet = new Planet();
+        planet.setPlayerId(playerId);
+        planet.setName("Colony");
+        planet.setGalaxy(galaxy);
+        planet.setSystemId(systemId);
+        planet.setSlot(slot);
+        planet.setTemperature(temperature);
+        planet = planetRepository.save(planet);
+
+        List<Building> starters = Arrays.asList(
+            new Building(planet.getId(), BuildingType.METAL_MINE, 1, 0),
+            new Building(planet.getId(), BuildingType.CRYSTAL_MINE, 1, 1),
+            new Building(planet.getId(), BuildingType.GAS_MINE, 1, 2),
+            new Building(planet.getId(), BuildingType.SOLAR_PLANT, 1, 3),
+            new Building(planet.getId(), BuildingType.METAL_STORAGE, 1, 4),
+            new Building(planet.getId(), BuildingType.CRYSTAL_STORAGE, 1, 5),
+            new Building(planet.getId(), BuildingType.GAS_STORAGE, 1, 6),
+            new Building(planet.getId(), BuildingType.ROBOT_FACTORY, 0, 7),
+            new Building(planet.getId(), BuildingType.RESEARCH_LAB, 0, 8),
+            new Building(planet.getId(), BuildingType.SHIPYARD, 0, 9)
+        );
+        buildingRepository.saveAll(starters);
         return planet;
     }
 
@@ -107,7 +144,17 @@ public class PlanetService {
             }
         }
 
-        planet.setEnergy(energyProduced - energyConsumed);
+        int fusionLevel = buildings.stream()
+            .filter(b -> b.getBuildingType() == BuildingType.FUSION_REACTOR)
+            .mapToInt(Building::getLevel)
+            .findFirst().orElse(0);
+        int energyTechLevel = playerTechnologyRepository
+            .findByPlayerIdAndTechnology(planet.getPlayerId(), Technology.ENERGY_TECH)
+            .map(PlayerTechnology::getLevel)
+            .orElse(0);
+        double fusionEnergy = balancer.getFusionEnergy(fusionLevel, energyTechLevel);
+
+        planet.setEnergy(energyProduced + fusionEnergy - energyConsumed);
         boolean energyPositive = planet.getEnergy() >= 0;
 
         metalProd = 0; crystalProd = 0; gasProd = 0;

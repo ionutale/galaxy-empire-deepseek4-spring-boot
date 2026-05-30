@@ -1,0 +1,65 @@
+<h2>Phase 7a — Frontend Architecture</h2>
+
+<div class="section">
+  <h3>Persistent Resource Header Bar</h3>
+  <p>A new <code>ResourceBarComponent</code> displayed at the top of every page:</p>
+  <div class="mockup" style="max-width:600px;margin:0 auto;">
+    <div class="mockup-header">App Navigation</div>
+    <div class="mockup-body" style="padding:0;">
+      <div style="display:flex;background:#1a1a2e;border-bottom:1px solid #333;padding:8px 16px;gap:20px;font-size:13px;align-items:center;flex-wrap:wrap;">
+        <span style="color:#ffd700;font-weight:bold;">Galactic Empire</span>
+        <span style="color:#888;">Planet: Planet-1 |</span>
+        <span style="color:#4af;">&#9679; Metal: <b>12,450</b></span>
+        <span style="color:#6bf;">&#9679; Crystal: <b>8,320</b></span>
+        <span style="color:#f44;">&#9679; Gas: <b>5,180</b></span>
+        <span style="color:#ff0;">&#9889; Energy: <b>+42</b></span>
+        <span style="font-size:10px;color:#666;">/ 50,000</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Implementation Details</h3>
+  <ul>
+    <li><strong>New component:</strong> <code>ResourceBarComponent</code> — standalone, injected into <code>AppComponent</code> above router-outlet</li>
+    <li>Polls <code>GET /planets/{activePlanetId}/resources</code> every 10 seconds</li>
+    <li>Red background bar for resources near cap (&gt;90%) or energy deficit</li>
+    <li>Shows: current amount, storage cap, per-hour production rate (tooltip)</li>
+    <li>Planet selector dropdown lets user switch active planet</li>
+    <li><code>formatNum()</code> for display (K/M suffixes)</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>Active Planet State</h3>
+  <ul>
+    <li><code>AppComponent</code> holds <code>activePlanetId</code> state</li>
+    <li>Navigating to a planet (overview, resources, etc.) sets it</li>
+    <li>Stored in a simple shared service or BehaviorSubject</li>
+    <li>Resource bar reads from this</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>Changes to Existing Components</h3>
+  <ul>
+    <li><strong>OverviewComponent:</strong> Remove inline resource display (now in header bar)</li>
+    <li><strong>ResourcesComponent:</strong> Keep building grid, remove header resource bar</li>
+    <li><strong>AppComponent:</strong> Add <code>&lt;app-resource-bar&gt;</code> before <code>&lt;router-outlet&gt;</code></li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>DTO: PlanetResourcesResponse</h3>
+  <pre style="font-size:11px;background:#111;padding:8px;border-radius:4px;color:#4af;">
+{
+  "metal": 12450, "crystal": 8320, "gas": 5180, "energy": 42,
+  "metalRate": 1200, "crystalRate": 800, "gasRate": 400,
+  "metalStorage": 50000, "crystalStorage": 50000, "gasStorage": 50000,
+  "energyConsumption": 158
+}
+  </pre>
+</div>
+
+<p class="subtitle">Does this frontend architecture look right?</p>

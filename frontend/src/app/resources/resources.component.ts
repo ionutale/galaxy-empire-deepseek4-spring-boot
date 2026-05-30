@@ -11,14 +11,6 @@ import { Planet, Building } from '../core/models/models';
     <div class="resources-view" *ngIf="planet() as p">
       <header>
         <h2>Resources — {{ p.name }}</h2>
-        <div class="resources-bar">
-          <span class="res metal">⛁ {{ formatNum(p.resources.metal) }}</span>
-          <span class="res crystal">◆ {{ formatNum(p.resources.crystal) }}</span>
-          <span class="res gas">◈ {{ formatNum(p.resources.gas) }}</span>
-          <span class="res energy" [class.negative]="p.resources.energy < 0">
-            ⚡ {{ formatNum(p.resources.energy) }}
-          </span>
-        </div>
       </header>
 
       <svg viewBox="0 0 500 400" class="planet-grid">

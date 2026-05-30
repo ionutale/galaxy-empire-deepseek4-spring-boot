@@ -1,0 +1,3 @@
+/workspace/backend/gateway/src/main/java/com/galaxyempire/gateway/GatewayApplication.java
+/workspace/backend/gateway/src/main/java/com/galaxyempire/gateway/config/GatewayConfig.java
+/workspace/backend/gateway/src/main/java/com/galaxyempire/gateway/filter/JwtAuthFilter.java

@@ -18,26 +18,6 @@ import { WebSocketService } from '../core/services/web-socket.service';
         <span class="temp">{{ p.temperature }}°C</span>
       </header>
 
-      <div class="resources">
-        <div class="res">
-          <span class="label">Metal</span>
-          <span class="value">{{ formatNum(p.resources.metal) }}</span>
-        </div>
-        <div class="res">
-          <span class="label">Crystal</span>
-          <span class="value">{{ formatNum(p.resources.crystal) }}</span>
-        </div>
-        <div class="res">
-          <span class="label">Gas</span>
-          <span class="value">{{ formatNum(p.resources.gas) }}</span>
-        </div>
-        <div class="res energy">
-          <span class="label">Energy</span>
-          <span class="value" [class.negative]="p.resources.energy < 0">
-            {{ formatNum(p.resources.energy) }}
-          </span>
-        </div>
-      </div>
 
       <div class="actions">
         <button (click)="nav('resources')">Resources</button>
@@ -49,6 +29,7 @@ import { WebSocketService } from '../core/services/web-socket.service';
         <div class="queue-item" *ngFor="let q of queue()">
           <span>{{ q.buildingType }} → Lv{{ q.targetLevel }}</span>
           <span class="timer">{{ getRemaining(q) }}</span>
+          <button class="speed-up" (click)="speedUpBuilding(q.id, $event)">Speed Up</button>
         </div>
       </div>
     </div>
@@ -84,6 +65,8 @@ import { WebSocketService } from '../core/services/web-socket.service';
       border-radius: 4px; display: flex; justify-content: space-between;
     }
     .timer { color: #4c4; font-size: 0.85rem; }
+    .speed-up { background: #7c3aed; color: #fff; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-left: 8px; }
+    .speed-up:hover { background: #6d28d9; }
     .loading { text-align: center; padding: 2rem; color: #888; }
   `]
 })
@@ -138,6 +121,15 @@ export class OverviewComponent implements OnInit {
     if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
     if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
     return Math.floor(n).toString();
+  }
+
+  speedUpBuilding(queueId: number, event: Event) {
+    event.stopPropagation();
+    const pid = this.planet()?.id;
+    if (!pid) return;
+    this.game.speedUpBuilding(pid, queueId).subscribe(() => {
+      this.loadPlanet();
+    });
   }
 
   nav(view: string) {

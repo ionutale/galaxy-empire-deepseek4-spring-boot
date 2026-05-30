@@ -1,22 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
+import { GameService } from './core/services/game.service';
+import { PlanetStateService } from './core/services/planet-state.service';
+import { ResourceBarComponent } from './resource-bar/resource-bar.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ResourceBarComponent],
   template: `
     <div class="app">
       <nav *ngIf="auth.isLoggedIn()" class="top-nav">
         <a routerLink="/overview" routerLinkActive="active">Overview</a>
         <a routerLink="/resources" routerLinkActive="active">Resources</a>
         <a routerLink="/facilities" routerLinkActive="active">Facilities</a>
+        <a routerLink="/research" routerLinkActive="active">Research</a>
+        <a routerLink="/shipyard" routerLinkActive="active">Shipyard</a>
+        <a routerLink="/fleet" routerLinkActive="active">Fleet</a>
+        <a routerLink="/galaxy" routerLinkActive="active">Galaxy</a>
         <span class="spacer"></span>
         <span class="username">{{ auth.getUsername() }}</span>
         <button class="logout-btn" (click)="auth.logout()">Logout</button>
       </nav>
+      <app-resource-bar />
       <main>
         <router-outlet />
       </main>
@@ -45,6 +53,18 @@ import { AuthService } from './core/services/auth.service';
     main { padding: 0; }
   `]
 })
-export class AppComponent {
-  constructor(public auth: AuthService) {}
+export class AppComponent implements OnInit {
+  constructor(
+    public auth: AuthService,
+    private gameService: GameService,
+    private planetState: PlanetStateService
+  ) {}
+
+  ngOnInit() {
+    this.gameService.getMyPlanets().subscribe((planets: { id: number; name: string; coordinates: string }[]) => {
+      if (planets.length > 0) {
+        this.planetState.setActivePlanet(planets[0].id);
+      }
+    });
+  }
 }
