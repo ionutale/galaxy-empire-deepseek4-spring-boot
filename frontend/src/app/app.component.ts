@@ -20,6 +20,7 @@ import { ResourceBarComponent } from './resource-bar/resource-bar.component';
         <a routerLink="/shipyard" routerLinkActive="active">Shipyard</a>
         <a routerLink="/fleet" routerLinkActive="active">Fleet</a>
         <a routerLink="/galaxy" routerLinkActive="active">Galaxy</a>
+        <a routerLink="/quests" routerLinkActive="active">Quests</a>
         <span class="spacer"></span>
         <span class="username">{{ auth.getUsername() }}</span>
         <button class="logout-btn" (click)="auth.logout()">Logout</button>

@@ -20,6 +20,7 @@ public class BuildingService {
     private final PlanetService planetService;
     private final EconomyService economyService;
     private final DarkMatterService darkMatterService;
+    private final QuestService questService;
     private final int maxQueue;
 
     public BuildingService(PlanetRepository planetRepository, BuildingRepository buildingRepository,
@@ -27,6 +28,7 @@ public class BuildingService {
                            GameBalancer balancer, PlanetService planetService,
                            EconomyService economyService,
                            DarkMatterService darkMatterService,
+                           QuestService questService,
                            @Value("${game.constructions.max-queue-per-planet:5}") int maxQueue) {
         this.planetRepository = planetRepository;
         this.buildingRepository = buildingRepository;
@@ -35,6 +37,7 @@ public class BuildingService {
         this.planetService = planetService;
         this.economyService = economyService;
         this.darkMatterService = darkMatterService;
+        this.questService = questService;
         this.maxQueue = maxQueue;
     }
 
@@ -119,7 +122,14 @@ public class BuildingService {
         buildingRepository.save(building);
 
         queue.setCompleted(true);
-        return constructionQueueRepository.save(queue);
+        ConstructionQueue saved = constructionQueueRepository.save(queue);
+
+        planetRepository.findById(queue.getPlanetId()).ifPresent(planet ->
+            questService.processQuestEvent(new QuestEvent(
+                planet.getPlayerId(), "BUILDING_UPGRADED",
+                queue.getBuildingType().name(), 1)));
+
+        return saved;
     }
 
     @Transactional

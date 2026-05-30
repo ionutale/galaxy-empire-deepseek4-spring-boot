@@ -197,3 +197,19 @@ export interface PlanetResourcesResponse {
 export interface DarkMatterResponse {
   darkMatter: number;
 }
+
+export interface QuestInfo {
+  progressId: number | null;
+  questDefinitionId: number;
+  title: string;
+  description: string;
+  icon: string;
+  questType: string;
+  category: string;
+  progress: number;
+  target: number;
+  rewardType: string;
+  rewardAmount: number;
+  completed: boolean;
+  claimed: boolean;
+}

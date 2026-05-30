@@ -18,17 +18,20 @@ public class ResearchService {
     private final BuildingRepository buildingRepository;
     private final GameBalancer gameBalancer;
     private final DarkMatterService darkMatterService;
+    private final QuestService questService;
 
     public ResearchService(PlayerTechnologyRepository playerTechnologyRepository,
                            ResearchQueueRepository researchQueueRepository,
                            BuildingRepository buildingRepository,
                            GameBalancer gameBalancer,
-                           DarkMatterService darkMatterService) {
+                           DarkMatterService darkMatterService,
+                           QuestService questService) {
         this.playerTechnologyRepository = playerTechnologyRepository;
         this.researchQueueRepository = researchQueueRepository;
         this.buildingRepository = buildingRepository;
         this.gameBalancer = gameBalancer;
         this.darkMatterService = darkMatterService;
+        this.questService = questService;
     }
 
     @Transactional(readOnly = true)
@@ -136,6 +139,10 @@ public class ResearchService {
             .orElseThrow();
         playerTech.setLevel(queue.getTargetLevel());
         playerTechnologyRepository.save(playerTech);
+
+        questService.processQuestEvent(new QuestEvent(
+            queue.getPlayerId(), "RESEARCH_COMPLETED",
+            queue.getTechnology().name(), 1));
     }
 
     @Transactional

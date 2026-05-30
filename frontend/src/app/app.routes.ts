@@ -10,6 +10,7 @@ export const routes: Routes = [
   { path: 'shipyard', loadComponent: () => import('./shipyard/shipyard.component').then(m => m.ShipyardComponent), canActivate: [AuthGuard] },
   { path: 'fleet', loadComponent: () => import('./fleet/fleet.component').then(m => m.FleetComponent), canActivate: [AuthGuard] },
   { path: 'galaxy', loadComponent: () => import('./galaxy/galaxy.component').then(m => m.GalaxyComponent), canActivate: [AuthGuard] },
+  { path: 'quests', loadComponent: () => import('./quest/quest.component').then(m => m.QuestComponent), canActivate: [AuthGuard] },
   { path: '', redirectTo: '/overview', pathMatch: 'full' },
   { path: '**', redirectTo: '/overview' }
 ];

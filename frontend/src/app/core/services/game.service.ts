@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Planet, ConstructionQueue, Technology, ResearchQueue, ShipTypeInfo, PlanetShip, ShipyardQueue, Fleet, CombatReport, DebrisField, EspionageReport, DefenseType, PlanetDefense, SystemInfo, SlotInfo, SystemDetail, PlanetResourcesResponse, DarkMatterResponse } from '../models/models';
+import { Planet, ConstructionQueue, Technology, ResearchQueue, ShipTypeInfo, PlanetShip, ShipyardQueue, Fleet, CombatReport, DebrisField, EspionageReport, DefenseType, PlanetDefense, SystemInfo, SlotInfo, SystemDetail, PlanetResourcesResponse, DarkMatterResponse, QuestInfo } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -144,5 +144,13 @@ export class GameService {
 
   speedUpResearch(technology: string) {
     return this.http.post(`${environment.apiUrl}/game/technologies/speed-up`, { technology });
+  }
+
+  getQuests() {
+    return this.http.get<QuestInfo[]>(`${environment.apiUrl}/game/quests`);
+  }
+
+  claimQuestReward(progressId: number) {
+    return this.http.post(`${environment.apiUrl}/game/quests/${progressId}/claim`, {});
   }
 }

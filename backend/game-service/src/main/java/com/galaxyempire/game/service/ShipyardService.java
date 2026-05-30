@@ -20,6 +20,7 @@ public class ShipyardService {
     private final PlanetDefenseRepository planetDefenseRepository;
     private final EconomyService economyService;
     private final DarkMatterService darkMatterService;
+    private final QuestService questService;
 
     public ShipyardService(PlanetShipRepository planetShipRepository,
                            ShipyardQueueRepository shipyardQueueRepository,
@@ -28,7 +29,8 @@ public class ShipyardService {
                            GameBalancer gameBalancer,
                            PlanetDefenseRepository planetDefenseRepository,
                            EconomyService economyService,
-                           DarkMatterService darkMatterService) {
+                           DarkMatterService darkMatterService,
+                           QuestService questService) {
         this.planetShipRepository = planetShipRepository;
         this.shipyardQueueRepository = shipyardQueueRepository;
         this.buildingRepository = buildingRepository;
@@ -37,6 +39,7 @@ public class ShipyardService {
         this.planetDefenseRepository = planetDefenseRepository;
         this.economyService = economyService;
         this.darkMatterService = darkMatterService;
+        this.questService = questService;
     }
 
     @Transactional(readOnly = true)
@@ -214,6 +217,11 @@ public class ShipyardService {
             .orElseGet(() -> planetShipRepository.save(new PlanetShip(queue.getPlanetId(), queue.getShipType())));
         planetShip.addQuantity(queue.getQuantity());
         planetShipRepository.save(planetShip);
+
+        planetRepository.findById(queue.getPlanetId()).ifPresent(planet ->
+            questService.processQuestEvent(new QuestEvent(
+                planet.getPlayerId(), "SHIPS_BUILT",
+                queue.getShipType().name(), queue.getQuantity())));
     }
 
     @Transactional

@@ -22,6 +22,7 @@ public class CombatService {
     private final GameBalancer gameBalancer;
     private final ObjectMapper objectMapper;
     private final PlanetDefenseRepository planetDefenseRepository;
+    private final QuestService questService;
 
     public CombatService(PlanetShipRepository planetShipRepository,
                          FleetShipRepository fleetShipRepository,
@@ -30,7 +31,8 @@ public class CombatService {
                          PlanetRepository planetRepository,
                          GameBalancer gameBalancer,
                          ObjectMapper objectMapper,
-                         PlanetDefenseRepository planetDefenseRepository) {
+                         PlanetDefenseRepository planetDefenseRepository,
+                         QuestService questService) {
         this.planetShipRepository = planetShipRepository;
         this.fleetShipRepository = fleetShipRepository;
         this.debrisFieldRepository = debrisFieldRepository;
@@ -39,6 +41,7 @@ public class CombatService {
         this.gameBalancer = gameBalancer;
         this.objectMapper = objectMapper;
         this.planetDefenseRepository = planetDefenseRepository;
+        this.questService = questService;
     }
 
     @Transactional
@@ -214,7 +217,14 @@ public class CombatService {
         report.setDebrisCrystal(debrisCrystal);
         report.setResourcesLooted(toJson(Map.of("metal", lootedMetal, "crystal", lootedCrystal, "gas", lootedGas)));
         report.setRounds(toJson(roundData));
-        return combatReportRepository.save(report);
+        CombatReport savedReport = combatReportRepository.save(report);
+
+        if ("ATTACKER_WIN".equals(result)) {
+            questService.processQuestEvent(new QuestEvent(
+                fleet.getPlayerId(), "BATTLE_WON", "", 1));
+        }
+
+        return savedReport;
     }
 
     private void fireShipGroup(ShipType firerType, int quantity, List<?> targets,
