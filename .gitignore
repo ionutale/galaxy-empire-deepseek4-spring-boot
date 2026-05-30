@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Maven / Java
+**/target/
+*.log
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS / temp
+*.swp
+*.swo
+*~
