@@ -5,6 +5,8 @@ import com.galaxyempire.game.service.DarkMatterService;
 import com.galaxyempire.game.service.EconomyService;
 import com.galaxyempire.game.service.PlanetService;
 import com.galaxyempire.game.service.ShipyardService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,15 +21,18 @@ public class PlanetController {
     private final DarkMatterService darkMatterService;
     private final BuildingService buildingService;
     private final ShipyardService shipyardService;
+    private final boolean debugEndpointsEnabled;
 
     public PlanetController(PlanetService planetService, EconomyService economyService,
                             DarkMatterService darkMatterService, BuildingService buildingService,
-                            ShipyardService shipyardService) {
+                            ShipyardService shipyardService,
+                            @Value("${game.debug.endpoints-enabled:false}") boolean debugEndpointsEnabled) {
         this.planetService = planetService;
         this.economyService = economyService;
         this.darkMatterService = darkMatterService;
         this.buildingService = buildingService;
         this.shipyardService = shipyardService;
+        this.debugEndpointsEnabled = debugEndpointsEnabled;
     }
 
     @GetMapping("/planets/{id}")
@@ -71,8 +76,14 @@ public class PlanetController {
         return ResponseEntity.ok(Map.of("darkMatter", darkMatterService.getDarkMatter(playerId)));
     }
 
+    // Debug-only: grants dark matter without payment or ownership checks. Disabled by
+    // default; enable with game.debug.endpoints-enabled=true for local development only.
     @PostMapping("/players/{playerId}/dark-matter/add")
     public ResponseEntity<?> addDarkMatter(@PathVariable Long playerId, @RequestBody Map<String, Integer> body) {
+        if (!debugEndpointsEnabled) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "Debug endpoint disabled"));
+        }
         darkMatterService.addDarkMatter(playerId, body.getOrDefault("amount", 0));
         return ResponseEntity.ok(Map.of("darkMatter", darkMatterService.getDarkMatter(playerId)));
     }
