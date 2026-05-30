@@ -21,6 +21,11 @@ frontend/.angular/
 .idea/
 *.iml
 
+# Agent tooling / scratch
+.superpowers/
+.opencode/
+.claude/
+
 # OS / temp
 *.swp
 *.swo

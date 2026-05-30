@@ -1,9 +1,0 @@
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/AuthServiceApplication.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/config/JwtUtil.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/config/SecurityConfig.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/domain/Player.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/repository/PlayerRepository.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/service/AuthService.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/web/AuthController.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/web/AuthResponse.java
-/workspace/backend/auth-service/src/main/java/com/galaxyempire/auth/web/LoginRequest.java
