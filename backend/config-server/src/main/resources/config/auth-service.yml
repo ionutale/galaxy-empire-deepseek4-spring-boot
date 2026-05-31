@@ -1,5 +1,11 @@
 server:
   port: 8081
+  tomcat:
+    threads:
+      max: 30
+      min-spare: 4
+    max-connections: 1024
+    accept-count: 50
 
 spring:
   application:
@@ -9,8 +15,8 @@ spring:
     username: ${DB_USER:auth_user}
     password: ${DB_PASSWORD:auth_pass}
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
+      maximum-pool-size: 5
+      minimum-idle: 1
   jpa:
     hibernate:
       ddl-auto: none

@@ -16,6 +16,11 @@ spec:
       containers:
         - name: config-server
           image: localhost:5000/galaxy-empire/config-server:latest
+          resources:
+            requests:
+              memory: "256Mi"
+            limits:
+              memory: "448Mi"
           ports:
             - containerPort: 8888
           env:

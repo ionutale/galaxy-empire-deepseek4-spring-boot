@@ -16,6 +16,11 @@ spec:
       containers:
         - name: game-service
           image: localhost:5000/galaxy-empire/game-service:latest
+          resources:
+            requests:
+              memory: "320Mi"
+            limits:
+              memory: "576Mi"
           ports:
             - containerPort: 8082
           env:

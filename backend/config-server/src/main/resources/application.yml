@@ -1,5 +1,10 @@
 server:
   port: 8888
+  tomcat:
+    threads:
+      max: 20
+      min-spare: 2
+    max-connections: 256
 
 spring:
   application:

@@ -16,6 +16,11 @@ spec:
       containers:
         - name: gateway
           image: localhost:5000/galaxy-empire/gateway:latest
+          resources:
+            requests:
+              memory: "256Mi"
+            limits:
+              memory: "512Mi"
           ports:
             - containerPort: 8080
           env:

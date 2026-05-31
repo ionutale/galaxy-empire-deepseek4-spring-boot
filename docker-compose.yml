@@ -64,6 +64,7 @@ services:
       context: .
       dockerfile: backend/config-server/Dockerfile
     container_name: galaxy-config-server
+    mem_limit: 448m
     ports:
       - "8888:8888"
     environment:
@@ -83,6 +84,7 @@ services:
       context: .
       dockerfile: backend/eureka-server/Dockerfile
     container_name: galaxy-eureka-server
+    mem_limit: 448m
     ports:
       - "8761:8761"
     environment:
@@ -106,6 +108,7 @@ services:
       context: .
       dockerfile: backend/gateway/Dockerfile
     container_name: galaxy-gateway
+    mem_limit: 512m
     ports:
       - "8080:8080"
     environment:
@@ -131,6 +134,7 @@ services:
       context: .
       dockerfile: backend/auth-service/Dockerfile
     container_name: galaxy-auth-service
+    mem_limit: 512m
     ports:
       - "8081:8081"
     environment:
@@ -163,6 +167,7 @@ services:
       context: .
       dockerfile: backend/game-service/Dockerfile
     container_name: galaxy-game-service
+    mem_limit: 576m
     ports:
       - "8082:8082"
     environment:

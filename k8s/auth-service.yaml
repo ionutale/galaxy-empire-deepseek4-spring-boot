@@ -16,6 +16,11 @@ spec:
       containers:
         - name: auth-service
           image: localhost:5000/galaxy-empire/auth-service:latest
+          resources:
+            requests:
+              memory: "320Mi"
+            limits:
+              memory: "512Mi"
           ports:
             - containerPort: 8081
           env:

@@ -15,6 +15,7 @@ USER appuser
 WORKDIR /app
 COPY --from=builder /build/backend/game-service/target/*.jar app.jar
 EXPOSE 8082
+ENV JAVA_TOOL_OPTIONS="-Xmx288m -XX:MaxMetaspaceSize=192m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k -XX:+ExitOnOutOfMemoryError"
 HEALTHCHECK --interval=10s --timeout=5s --retries=10 \
   CMD wget -qO- http://localhost:8082/actuator/health || exit 1
 ENTRYPOINT ["java", "-jar", "app.jar"]
