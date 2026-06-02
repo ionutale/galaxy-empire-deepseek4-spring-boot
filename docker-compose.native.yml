@@ -1,0 +1,254 @@
+version: "3.9"
+
+networks:
+  galaxy-net:
+    driver: bridge
+
+volumes:
+  postgres-auth-data:
+  postgres-game-data:
+  prometheus-data:
+  grafana-data:
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres-auth:
+    image: postgres:16-alpine
+    container_name: galaxy-postgres-auth
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME:-auth_db}
+      POSTGRES_USER: ${AUTH_DB_USER:-auth_user}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD:-auth_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-auth-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER:-auth_user} -d ${AUTH_DB_NAME:-auth_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  postgres-game:
+    image: postgres:16-alpine
+    container_name: galaxy-postgres-game
+    environment:
+      POSTGRES_DB: ${GAME_DB_NAME:-game_db}
+      POSTGRES_USER: ${GAME_DB_USER:-game_user}
+      POSTGRES_PASSWORD: ${GAME_DB_PASSWORD:-game_pass}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-game-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${GAME_DB_USER:-game_user} -d ${GAME_DB_NAME:-game_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  config-server:
+    build:
+      context: .
+      dockerfile: backend/config-server/Dockerfile.native
+    container_name: galaxy-config-server-native
+    mem_limit: 128m
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: native
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: backend/eureka-server/Dockerfile.native
+    container_name: galaxy-eureka-server-native
+    mem_limit: 128m
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      CONFIG_SERVER_URL: http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  gateway:
+    build:
+      context: .
+      dockerfile: backend/gateway/Dockerfile.native
+    container_name: galaxy-gateway-native
+    mem_limit: 192m
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      JWT_SECRET: ${JWT_SECRET:-default-secret-change-in-production-at-least-256-bits-long}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: backend/auth-service/Dockerfile.native
+    container_name: galaxy-auth-service-native
+    mem_limit: 192m
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      DB_HOST: postgres-auth
+      DB_PORT: 5432
+      DB_NAME: ${AUTH_DB_NAME:-auth_db}
+      DB_USER: ${AUTH_DB_USER:-auth_user}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD:-auth_pass}
+      JWT_SECRET: ${JWT_SECRET:-default-secret-change-in-production-at-least-256-bits-long}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres-auth:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  game-service:
+    build:
+      context: .
+      dockerfile: backend/game-service/Dockerfile.native
+    container_name: galaxy-game-service-native
+    mem_limit: 256m
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      DB_HOST: postgres-game
+      DB_PORT: 5432
+      DB_NAME: ${GAME_DB_NAME:-game_db}
+      DB_USER: ${GAME_DB_USER:-game_user}
+      DB_PASSWORD: ${GAME_DB_PASSWORD:-game_pass}
+      JWT_SECRET: ${JWT_SECRET:-default-secret-change-in-production-at-least-256-bits-long}
+      UNIVERSE_SPEED: ${UNIVERSE_SPEED:-1}
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres-game:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: galaxy-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      gateway:
+        condition: service_healthy
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: galaxy-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: galaxy-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: ""
+    depends_on:
+      - prometheus
+    networks:
+      - galaxy-net
+    restart: unless-stopped
+    logging: *default-logging

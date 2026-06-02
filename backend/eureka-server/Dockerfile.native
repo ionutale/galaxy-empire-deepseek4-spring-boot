@@ -1,25 +1,24 @@
-# GraalVM native-image spike for auth-service.
-# Build: docker build -f backend/auth-service/Dockerfile.native -t auth-native:spike .
+# GraalVM native-image build for eureka-server.
+# Build: docker build -f backend/eureka-server/Dockerfile.native -t eureka-native:spike .
 # Note: native-image compilation is RAM-hungry (~4-6GB); on a small Docker VM it may OOM.
+# Note: spring-cloud-starter-netflix-eureka-server native support is experimental.
 FROM ghcr.io/graalvm/graalvm-community:21 AS builder
 ARG MAVEN_VERSION=3.9.9
 RUN curl -fsSL "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
       | tar -xz -C /opt \
     && ln -s "/opt/apache-maven-${MAVEN_VERSION}/bin/mvn" /usr/local/bin/mvn
 WORKDIR /build
-# Module poms first so the reactor model resolves (mirrors the JVM Dockerfile).
 COPY pom.xml /build/pom.xml
 COPY backend/config-server/pom.xml /build/backend/config-server/pom.xml
 COPY backend/eureka-server/pom.xml /build/backend/eureka-server/pom.xml
 COPY backend/gateway/pom.xml /build/backend/gateway/pom.xml
 COPY backend/auth-service/pom.xml /build/backend/auth-service/pom.xml
 COPY backend/game-service/pom.xml /build/backend/game-service/pom.xml
-COPY backend/auth-service/src /build/backend/auth-service/src
-RUN mvn -Pnative -pl backend/auth-service -DskipTests native:compile
+COPY backend/eureka-server/src /build/backend/eureka-server/src
+RUN mvn -Pnative -pl backend/eureka-server -DskipTests native:compile
 
-# Minimal glibc runtime; the native binary needs no JVM.
 FROM debian:bookworm-slim
 WORKDIR /app
-COPY --from=builder /build/backend/auth-service/target/auth-service /app/auth-service
-EXPOSE 8081
-ENTRYPOINT ["/app/auth-service"]
+COPY --from=builder /build/backend/eureka-server/target/eureka-server /app/eureka-server
+EXPOSE 8761
+ENTRYPOINT ["/app/eureka-server"]
